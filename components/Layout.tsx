@@ -1,6 +1,5 @@
 import React from 'react';
 import {Container, Row} from 'react-bootstrap'
-import Head from 'next/head';
 
 interface LayoutProps {
     children: any;

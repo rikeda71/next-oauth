@@ -1,4 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-social/bootstrap-social.css';
+import 'bootstrap-social/assets/css/font-awesome.css';
 import '../styles/globals.css';
 import Head from "next/head";
 import React from "react";

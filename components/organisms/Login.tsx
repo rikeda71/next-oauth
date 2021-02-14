@@ -2,6 +2,7 @@ import {EmailAndPasswordForm} from "../molecules/EmailAndPasswordForm";
 import {NormalButton} from "../atoms/NormalButton";
 import {BoldText} from "../atoms/Text";
 import {Form} from "react-bootstrap";
+import {SocialLoginButton} from "../atoms/SocialLoginButton";
 
 export function Login() {
     return (
@@ -12,7 +13,9 @@ export function Login() {
                 <NormalButton text={'Login'}/>
                 <NormalButton text={'Sign in'} variant={'success'}/>
             </div>
-            <div className='socialButtonGroups'>
+            <div className='socialButtonGroups' style={{display: 'block'}}>
+                <SocialLoginButton type={'google'} />
+                <SocialLoginButton type={'github'} />
             </div>
         </Form>
     )
