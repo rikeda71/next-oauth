@@ -1,10 +1,10 @@
-import FormControl from 'react-bootstrap/FormControl'
+import FormControl from "react-bootstrap/FormControl";
 
 interface FormProps {
-    placeholder: string,
-    type: string
+  placeholder: string;
+  type: string;
 }
 
 export function FormInput(props: FormProps) {
-    return <FormControl placeholder={props.placeholder} type={props.type}/>
+  return <FormControl placeholder={props.placeholder} type={props.type} />;
 }
