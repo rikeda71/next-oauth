@@ -41,7 +41,14 @@ export const UserPage: React.FC = () => {
   // ログイン情報を保持しているかでユーザ情報を表示するかログインボタンを表示するか決めている
   return (
     <div>
-      {user ? <User {...user} /> : <Link href={"/login"}>ログイン</Link>}
+      {user ? (
+        <div>
+          <User {...user} />
+          <Link href={"/logout"}>ログアウト</Link>
+        </div>
+      ) : (
+        <Link href={"/login"}>ログイン</Link>
+      )}
     </div>
   );
 };

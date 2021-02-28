@@ -12,12 +12,16 @@ interface IOauthCallback {
   message?: string;
 }
 
+interface ILogout {
+  message: string;
+}
+
 const client = axios.create({
   baseURL: API_ENDPOINT,
   headers: {
     "Content-Type": "application/x-www-form-urlencoded",
-    "Access-Control-Allow-Origin": "http://localhost:3000",
   },
+  withCredentials: true,
 });
 
 export const socialLogin = (endpoint: string) => {
@@ -47,6 +51,7 @@ export const socialLoginCallback = (
     .then((res) => {
       if (res.data.token) {
         // TODO: よくない保存方法。実際はキャッシュストレージに入れるのがいい?
+        // もしくは http only cookie を使う。フロントエンドからは意識しないようにするのが良さそう
         localStorage.setItem(`jwt_token`, res.data.token);
         window.location.replace("/");
       } else {
@@ -58,15 +63,34 @@ export const socialLoginCallback = (
     });
 };
 
+export const logout = (token: string): void => {
+  client
+    .get<ILogout>("/logout", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((res) => {
+      if (res.data.message.indexOf("success") > -1) {
+        console.log("logout success");
+      } else {
+        console.log("failed to logout");
+      }
+      // TODO: httpOnly cookie を使うようにしたら消す
+      {
+        localStorage.removeItem("jwt_token");
+      }
+      window.location.replace("/");
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+/**
+ * TODO: httpOnly cookie を使うようにしたら消す
+ */
 export const getAuthorizationBearer = (): string => {
+  // localStorage版 よくない
   return localStorage.getItem("jwt_token");
-  // cookie版 うまくいかなかったので、一旦放置
-  // const cookiesArray = document.cookie.split(';');
-  // for (let c of cookiesArray) {
-  //     const keyValue = c.split('=');
-  //     if (keyValue[0] == 'jwt_token') {
-  //         return keyValue[1];
-  //     }
-  // }
-  // return null;
 };

@@ -8,14 +8,15 @@ export const getUser = (token: string, successHandle: (res: IUser) => void) => {
     baseURL: API_ENDPOINT,
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      "Access-Control-Allow-Origin": "http://localhost:3000",
       Authorization: `Bearer ${token}`,
     },
+    withCredentials: true,
   });
   client
     .get<UserGetResponse>(GET_USER_ENDPOINT)
     .then((res) => {
       if (res.status === 200) {
+        console.log(res.data.user);
         successHandle(res.data.user);
       } else {
         console.log("failed to get user");
