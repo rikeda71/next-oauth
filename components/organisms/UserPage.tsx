@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { IUser } from "../../entity/User";
-import { getAuthorizationBearer } from "../../repository/authApi";
 import { getUser } from "../../repository/user";
 import Link from "next/link";
 
@@ -28,12 +27,7 @@ export const UserPage: React.FC = () => {
 
   useEffect(() => {
     const getUserFromApi = () => {
-      if (typeof localStorage !== "undefined") {
-        const token = getAuthorizationBearer();
-        if (token) {
-          getUser(token, setUser);
-        }
-      }
+      getUser(setUser);
     };
     getUserFromApi();
   }, []);

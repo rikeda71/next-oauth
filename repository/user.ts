@@ -3,12 +3,11 @@ import { API_ENDPOINT, GET_USER_ENDPOINT } from "../constants";
 import { IUser } from "../entity/User";
 import { UserGetResponse } from "../entity/api/user/Response";
 
-export const getUser = (token: string, successHandle: (res: IUser) => void) => {
+export const getUser = (successHandle: (res: IUser) => void) => {
   const client = axios.create({
     baseURL: API_ENDPOINT,
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Bearer ${token}`,
     },
     withCredentials: true,
   });
