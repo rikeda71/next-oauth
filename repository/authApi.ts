@@ -1,6 +1,7 @@
-import axios from "axios";
-import { API_ENDPOINT } from "../constants";
-import { ParsedUrlQuery } from "querystring";
+import axios from 'axios';
+import { API_ENDPOINT, SANCTUM_CSRF_URL } from '../constants';
+import { ParsedUrlQuery } from 'querystring';
+import { CLIENT_RENEG_LIMIT } from 'tls';
 
 interface IGetRedirectUrl {
   url?: string;
@@ -19,23 +20,30 @@ interface ILogout {
 const client = axios.create({
   baseURL: API_ENDPOINT,
   headers: {
-    "Content-Type": "application/x-www-form-urlencoded",
+    'Content-Type': 'application/x-www-form-urlencoded',
   },
   withCredentials: true,
 });
 
-export const socialLogin = (endpoint: string) => {
+export const socialLogin = (endpoint: string): void => {
   client
-    .get<IGetRedirectUrl>(endpoint)
+    .get(SANCTUM_CSRF_URL)
     .then((res) => {
-      if (res.data.url) {
-        window.location.replace(res.data.url);
-      } else {
-        console.log(res.data.message);
-      }
+      client
+        .post<IGetRedirectUrl>(endpoint)
+        .then((res) => {
+          if (res.data.url) {
+            window.location.replace(res.data.url);
+          } else {
+            console.log(res.data.message);
+          }
+        })
+        .catch((err) => {
+          console.log(`request oauth endpoint error. cause: ${err}`);
+        });
     })
     .catch((err) => {
-      console.log(`request oauth endpoint error. cause: ${err}`);
+      console.log(`failed to request 'sanctum/csrf-cookie'`);
     });
 };
 
@@ -43,54 +51,38 @@ export const socialLogin = (endpoint: string) => {
 export const socialLoginCallback = (
   endpoint: string,
   query: ParsedUrlQuery
-) => {
+): void => {
   client
-    .get<IOauthCallback>(endpoint, {
-      params: query,
-    })
+    .get(SANCTUM_CSRF_URL)
     .then((res) => {
-      if (res.data.token) {
-        // TODO: よくない保存方法。実際はキャッシュストレージに入れるのがいい?
-        // もしくは http only cookie を使う。フロントエンドからは意識しないようにするのが良さそう
-        localStorage.setItem(`jwt_token`, res.data.token);
-        window.location.replace("/");
+      client
+        .get<IOauthCallback>(endpoint, {
+          params: query,
+        })
+        .then((res) => {
+          window.location.replace('/');
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    })
+    .catch((err) => {
+      console.log(`failed to request 'sanctum/csrf-cookie'`);
+    });
+};
+
+export const logout = (): void => {
+  client
+    .get<ILogout>('/auth/logout')
+    .then((res) => {
+      if (res.data.message.indexOf('success') > -1) {
+        console.log('logout success');
       } else {
-        console.log(res.data.message);
+        console.log('failed to logout');
       }
+      window.location.replace('/');
     })
     .catch((err) => {
       console.log(err);
     });
-};
-
-export const logout = (token: string): void => {
-  client
-    .get<ILogout>("/logout", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((res) => {
-      if (res.data.message.indexOf("success") > -1) {
-        console.log("logout success");
-      } else {
-        console.log("failed to logout");
-      }
-      // TODO: httpOnly cookie を使うようにしたら消す
-      {
-        localStorage.removeItem("jwt_token");
-      }
-      window.location.replace("/");
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-};
-
-/**
- * TODO: httpOnly cookie を使うようにしたら消す
- */
-export const getAuthorizationBearer = (): string => {
-  // localStorage版 よくない
-  return localStorage.getItem("jwt_token");
 };
